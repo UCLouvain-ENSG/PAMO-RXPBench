@@ -1,0 +1,1 @@
+EXPERIMENT="subsets_heatmap_arm" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="ubuntu" RX_HOST="nic_dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_rule_subsets.py

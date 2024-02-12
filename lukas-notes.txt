@@ -1,0 +1,59 @@
+In dpdk-regex-test app they apply regex engine to a file.
+
+But they do it in a pre-parsed fashion
+Program flow
+
+- get file size 
+- user defines number of jobs (that is number of regex_ops)
+- the program checks for the max size that the device supports
+- number of jobs define an array of regex operations
+- these are preinitialized with the file data
+- then they try to enqueue them (the remaining ops) all at once
+- then they try to dequeue all that has not been enqueued
+- and repeat
+- they progress through the array of jobs/ops sequentially
+- no worries about running out of space, mempool, out of order processing, 
+  cross-referencing the requests
+
+What I don't understand - they enable OOS - out of order scan - 
+- the solution is pretty naive and progresses the array incrementally, 
+  but what if the op passed earlier is outpaced by a the recent op?
+
+
+API notes:
+
+You must provide array of OPS prefilled in when enqueueing.
+
+On dequeue you also need to provide the valid OPS objects! 
+But the objects are only filled with results and not with the original data,
+you either need to pass it the original OP objects or cross-reference the mbufs
+with the results.
+
+What is set on op object on dequeue is in extract_result function:
+- user_id
+- nb_matches
+- nb_actual_matches
+- matches array
+- rsp_flags
+
+What is translated on enqueue in prep_one function:
+- mbuf
+- req_flags
+- group_id0
+- group_id1
+- group_id2
+- group_id3
+- user_id
+
+regex enqueue/dequeue operations are async but they copy OP struct members to MLX job members
+so you don't loose the OPs objects - it's not like sending the objects to the BF and then receiving them
+therefore one array of ops is enough
+
+Super Debug command for getting rx rates of the intermediary output:
+ninja -C build/ && sudo ./build/regex-test -l 0,3 -a 0000:03:00.0,class=eth:regex,representor=[0,65535] --log-level=notice -- --port_mp_size 32767 --port_rx_descriptors 2048 --rgx_descriptors 256 --rgx_rules_path one-nonmatch.rof2 --port_mp_cache_size 0 > /tmp/out.txt 2>&1 && echo "" && awk -F'deq_burst_pkt_cnt ' '{split($2, a, " "); sum += a[1]} END {print "deq: " sum}' /tmp/out.txt && awk -F'enq_burst_pkts_cnt ' '{split($2, a, " "); sum += a[1]} END {print "enq: " sum}' /tmp/out.txt && grep -Eo "rx_good_packets [0-9]*" /tmp/out.txt && grep -Eo "rx_out_of_buffer [0-9]*" /tmp/out.txt && grep -Eo "rx_phy_packets [0-9]*" /tmp/out.txt && grep ttl /tmp/out.txt
+
+Hyperscan does not like some regexes 
+Regex-unfriendly examples:
+- rege(x(es)?|xps?)
+- go*gle
+- go+gle

@@ -1,0 +1,139 @@
+# Hyperscan vs RXP
+
+EXPERIMENT="hs_vs_rxp_v2_nic" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="nic_dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_hs_vs_rxp_cores.py
+
+EXPERIMENT="hs_vs_rxp_v2_host" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_hs_vs_rxp_cores.py
+
+python3 plot.py --pandas_query 'param_n_rules == 2048 and param_pkt_size == 1500 and processed_rate_percent > 99'
+python3 plot.py --pandas_query 'param_n_rules == 2048 and param_pkt_size == 1500 and param_lcores == "0-7" and processed_rate_percent > 99'
+python3 plot.py --pandas_query 'param_n_rules == 2048 and param_pkt_size == 1500 and param_lcores == "0-7" and processed_rate_percent > 99 and param_hs_enabled == 0'
+# Heatmap RXP
+
+EXPERIMENT="heatmap_v2_host" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_heatmap_rulesetsz_pktsz.py
+# reverify the overly good top corner
+EXPERIMENT="heatmap_v2_host_complement" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_heatmap_rulesetsz_pktsz_complement.py
+
+# Rule subsets RXP
+
+EXPERIMENT="rule_subsets_v4_host" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_rule_subsets.py
+
+
+# Latency
+# This measurement shows that RXP latency measured on the local machine has  3x higher latency that HS.
+# But measurement from the pktgen shows smaller latency for RXP (0.7x of the HS latency)
+# This is confusing but when regex-test only forwards that has the lowest pktgen latency, so pktgen measurement is correct
+# Also when experimented with 1 rule only, the HS has lower latency both locally and on pktgen
+# RXPBench report from Nvidia reported higher latency for RXP than for HS but it was only measured for the local operation not back to back latency
+
+EXPERIMENT="latency_hs_rxp_v3" BF2_SSH_KEY_PATH="~/.ssh/id_rsa" RX_USER="sismis" RX_HOST="dormeur" HOST_SSH_KEY_PATH="~/.ssh/id_rsa"  python3 exp_runner.py params_latency.py 
+
+python3 process.py --input_file result_latency_hs_rxp_v3.csv
+
+python3 plot.py --pandas_query "processed_rate_percent <= 100 and processed_rate_percent >= 99 and param_pkt_size == 1500 and param_n_rules == 2048" --right_y_axis tx_p0_b2b_latency_cycles_avg
+
+
+# Latency on average in bursts
+
+python3 process.py --input_file result_latency_hs_vs_rxp_bursts_v1.csv
+python3 plot-latency.py --pandas_query "app_avg_burst_size > 0 and app_avg_burst_size < 32"
+
+################################
+PAPER commands:
+###############################
+
+#########
+Figure - heatmap throughput
+#########
+
+# curations:
+
+python3 csvedit.py --input result_heatmap_v5_host.csv --query param_n_rules=16384 --query param_pkt_size=128 --query param_target_tp=33 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_heatmap_v5_host.csv --query param_n_rules=16384 --query param_pkt_size=128 --query param_target_tp=23 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_heatmap_v5_host.csv --query param_n_rules=16384 --query param_pkt_size=128 --query param_target_tp=23 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_heatmap_v5_host.csv --query param_n_rules=1 --query param_pkt_size=256 --query param_target_tp=25 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_heatmap_v5_host.csv --query param_n_rules=8192 --query param_pkt_size=512 --query param_target_tp=35 --set port0_rx_phy_packets=99999999999
+
+python3 process.py --input_file result_heatmap_v5_host.csv
+python3 plot-heatmap2.py --x_axis param_n_rules --y_axis param_pkt_size --zero_drop_thres 99.7 --pandas_query "param_n_rules >= 2048"
+mv throughput_heatmap.pdf figure-heatmap-throughput.pdf
+
+# Transfer to the local latex project - run from the local machine
+scp dormeur:/etinfo/users2/sismis/surrexcata/autotest/figure-heatmap-throughput.pdf images/throughput_heatmap.pdf 
+
+##########
+Figure - latency on subsets
+##########
+
+result_rule_subsets_v4_host.csv
+- 1 iteration
+
+python3 csvedit.py --input result_rule_subsets_v4_host.csv --output result_rule_subsets_v4_host_curated_v1.csv --query param_pkt_size=1500 --query param_n_rules=28255 --query param_rule_subset_ratio=1.0 --query param_target_tp=27 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_rule_subsets_v4_host_curated_v1.csv --query param_pkt_size=9000 --query param_n_rules=28255 --query param_rule_subset_ratio=1.0 --query param_target_tp=28 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_rule_subsets_v4_host_curated_v1.csv --query param_pkt_size=9000 --query param_n_rules=28255 --query param_rule_subset_ratio=1.0 --query param_target_tp=21 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_rule_subsets_v4_host_curated_v1.csv --query param_pkt_size=9000 --query param_n_rules=28255 --query param_rule_subset_ratio=1.0 --query param_target_tp=40 --set port0_rx_phy_packets=99999999999
+
+python3 process.py --input_file result_rule_subsets_v4_host_curated_v1.csv
+
+Filter out on either rule level or packet size
+
+# X axis is packet size then:
+# python3 plot-bar2.py --pandas_query "param_n_rules == 28255 " --zero_drop_thres 99.91 --y_axis #tx_p0_b2b_latency_cycles_avg
+
+# X axis is packet size then:
+# python3 plot-bar2.py --pandas_query "param_n_rules == 28255 " --zero_drop_thres 99.91 --y_axis param_target_tp
+
+python3 plot-bar4.py --pandas_query "param_n_rules == 28255 and param_pkt_size == 1500" --zero_drop_thres 99.8
+mv results_bar.pdf figure-bargraph-subsets-tpt-28krules.pdf
+scp dormeur:/etinfo/users2/sismis/surrexcata/autotest/figure-bargraph-subsets-tpt-28krules.pdf images/
+
+# python3 plot-bar2.py --pandas_query "param_n_rules == 2048" --zero_drop_thres 99.91 --y_axis tx_p0_b2b_latency_cycles_avg
+
+###########
+Figure - HS vs RXP - ARM vs x86
+###########
+
+result_hs_vs_rxp_v4_nic_curated_v1.csv, based on result_hs_vs_rxp_v4_nic.csv
+- 1 iteration
+- editcsv commands from the og file:
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic.csv --output result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-1" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=0 --query param_target_tp=34 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-1" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=0 --query param_target_tp=20 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-3" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=0 --query param_target_tp=59 --set port0_rx_phy_packets=99999999999
+
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-2" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=56 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-4" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=42 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-7" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=20 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-6" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=14 --set port0_rx_phy_packets=99999999999
+
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-6" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=1 --query param_target_tp=15 --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-7" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=1 --query param_target_tp=17 --set port0_rx_phy_packets=99999999999
+
+python3 csvedit.py --input result_hs_vs_rxp_v4_nic_curated_v1.csv --query param_lcores="0-6" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=53 --set port0_rx_phy_packets=99999999999
+
+
+
+result_hs_vs_rxp_v4_host_curated_v1.csv
+- 1 iteration
+- editcsv commands from the og file:
+python3 csvedit.py --input result_hs_vs_rxp_v4_host.csv --output result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-6" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=0 --query param_target_tp=54  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-3" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=35  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-3" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=18  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-4" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=0 --query param_target_tp=27  --set port0_rx_phy_packets=99999999999
+# HS
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-3" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=55  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-4" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=39  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-5" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=27  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-5" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=59  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-7" --query param_pkt_size=1500 --query param_n_rules=28255 --query param_hs_enabled=1 --query param_target_tp=22  --set port0_rx_phy_packets=99999999999
+python3 csvedit.py --input result_hs_vs_rxp_v4_host_curated_v1.csv --query param_lcores="0-3" --query param_pkt_size=1500 --query param_n_rules=2048 --query param_hs_enabled=1 --query param_target_tp=48  --set port0_rx_phy_packets=99999999999
+
+
+python3 process.py --input_file result_hs_vs_rxp_v4_host_curated_v1.csv && mv results_selected_aggr.csv host.csv
+python3 process.py --input_file result_hs_vs_rxp_v4_nic_curated_v1.csv && mv results_selected_aggr.csv nic.csv
+
+python3 plot-groups-new3.py --pandas_query 'param_pkt_size != 9000' --input_file nic.csv ARM --input_file host.csv x86
+# python3 plot-groups-new.py --pandas_query 'param_pkt_size != 9000' --input_file nic.csv ARM --input_file host.csv x86 --share_y
+
+mv results.pdf figure-linegraph-throughput-arm-x86.pdf
+
+# Transfer to the local latex project - run from the local machine
+scp dormeur:/etinfo/users2/sismis/surrexcata/autotest/figure-linegraph-throughput-arm-x86.pdf images/

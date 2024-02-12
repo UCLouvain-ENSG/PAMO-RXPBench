@@ -1,0 +1,16 @@
+hvac_traces
+measure-regex/results/*
+autotest/expelib.log
+autotest/results.csv
+autotest/rx_output.log
+autotest/tx_output.log
+autotest/renders/
+autotest/__pycache__/
+autotest/experiment.pckl
+autotest/aggregated_rgx_dequeued_packets.csv
+autotest/results.csv
+autotest/results_aggregated_rgx_dequeued_packets.csv
+autotest/results_selected_aggr.csv
+autotest/results.png
+
+.vscode/

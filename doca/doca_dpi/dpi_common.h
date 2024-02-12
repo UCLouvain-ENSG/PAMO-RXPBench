@@ -14,15 +14,16 @@
 #ifndef DPI_COMMON_H
 #define DPI_COMMON_H
 
-#define MAX_USER_FILE_PATH_SIZE 512				/* Maximum size of user file path */
-#define MAX_FILE_PATH_SIZE (MAX_USER_FILE_PATH_SIZE + 1)	/* Maximum size of file path */
-#define USER_PCI_ADDR_LEN 7					/* User PCI address string length */
+#define MAX_USER_FILE_PATH_SIZE 512 /* Maximum size of user file path */
+#define MAX_FILE_PATH_SIZE                                                     \
+  (MAX_USER_FILE_PATH_SIZE + 1) /* Maximum size of file path */
+#define USER_PCI_ADDR_LEN 7     /* User PCI address string length */
 #define PCI_ADDR_LEN (USER_PCI_ADDR_LEN + 1)
 
 /* Configuration struct */
 struct dpi_scan_config {
-	char sig_file_path[MAX_FILE_PATH_SIZE]; /* Signatures file path */
-	char pci_address[PCI_ADDR_LEN];		/* PCI device address */
+  char sig_file_path[MAX_FILE_PATH_SIZE]; /* Signatures file path */
+  char pci_address[PCI_ADDR_LEN];         /* PCI device address */
 };
 
 /*

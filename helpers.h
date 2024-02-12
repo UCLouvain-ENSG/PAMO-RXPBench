@@ -1,0 +1,1 @@
+long read_file(char *file, char **buf);

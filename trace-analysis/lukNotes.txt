@@ -1,0 +1,186 @@
+Ran on suricata-8-beta tag code with configure -O3 and --enable-dpdk and --enable-profiling
+
+Suricata config/rules are stored in this folder.
+Suricata reads `-r` folder with all 120 pcaps ~/pcap/ucl-traces-analysis/
+
+The output from suricata should be stored in one folder.
+
+That is then inspected with parselogs python script.
+
+Output:
+
+% Part 1 – Traffic Direction                                                                               
+                                                
+% | Traffic direction   |     Pkts |       Bytes |
+% |---------------------|----------|-------------|
+% | esp.toclient        |        0 |           0 |
+% | esp.toserver        |   351651 |   304445216 | % not counted
+% | icmp.toclient       |    55471 |     7523654 |
+% | icmp.toserver       |    83011 |    10779179 |
+% | ipv6-icmp.toclient  |       40 |        4160 |
+% | ipv6-icmp.toserver  |      126 |       12792 |
+% | ipv6.toclient       |        0 |           0 |
+% | ipv6.toserver       |     1384 |      332955 | % not counted
+% | tcp.toclient        | 68691838 | 67408852603 |
+% | tcp.toserver        | 71426735 | 69983797500 |
+% | udp.toclient        | 14660964 | 15848201706 |
+% | udp.toserver        | 49587569 | 38706137163 |
+                                                
+% Part 2 – SGH Checks                             
+
+% | SGH                      |   Checks |         
+% |--------------------------|----------|         
+% | <unknown:119>            |   351703 |
+% | <unknown:121>            |     1384 |         
+% | icmpv6.toclient          |    55511 |         
+% | icmpv6.toserver          |   126675 |
+% | tcp.toclient.0-65535     | 16438380 |         
+% | tcp.toclient.139-139     |      198 |                                                                  
+% | tcp.toclient.1433-1433   |       65 |                                                                  
+% | tcp.toclient.1863-1863   |     1354 |                                                                  
+% | tcp.toclient.2401-2401   |       44 |                                                                  
+% | tcp.toclient.2404-2404   |      164 |         
+% | tcp.toclient.3306-3306   |       68 |                                                                  
+% | tcp.toclient.3389-3389   |       76 |         
+% | tcp.toclient.443-443     | 42623105 |                                                                  
+% | tcp.toclient.4443-4443   |      128 |                                                                  
+% | tcp.toclient.445-445     |      135 |                                                                  
+% | tcp.toclient.5050-5050   |       40 |                                                                  
+% | tcp.toclient.5060-5060   |       53 |         
+% | tcp.toclient.5222-5222   |     4138 |                                                                  
+% | tcp.toclient.53-53       |    16865 |
+% | tcp.toclient.5631-5631   |      536 |
+% | tcp.toclient.6784-6784   |       87 |
+% | tcp.toclient.80-80       |  9131000 |
+% | tcp.toclient.8074-8074   |      115 |
+% | tcp.toclient.8080-8080   |      477 |
+% | tcp.toclient.9530-9530   |       20 |
+% | tcp.toserver.0-65535     | 45252987 |
+% | tcp.toserver.110-110     |      858 |
+% | tcp.toserver.135-135     |     1301 |
+% | tcp.toserver.137-137     |      130 |
+% | tcp.toserver.139-139     |      377 |
+% | tcp.toserver.143-143     |     4245 |
+% | tcp.toserver.1433-1433   |       92 |
+% | tcp.toserver.1434-1434   |      382 |
+% | tcp.toserver.1521-1521   |      219 |
+% | tcp.toserver.1556-1556   |      389 |
+% | tcp.toserver.1720-1720   |     1269 |
+% | tcp.toserver.1863-1863   |     3944 |
+% | tcp.toserver.22-22       |  2305109 |
+% | tcp.toserver.2323-2323   |      326 |
+% | tcp.toserver.2404-2404   |      274 |
+% | tcp.toserver.25-25       |   136754 |
+% | tcp.toserver.3306-3306   |       74 |
+% | tcp.toserver.3389-3389   |      608 |
+% | tcp.toserver.4143-4143   |       89 |
+% | tcp.toserver.4323-4323   |      972 |
+% | tcp.toserver.4333-4333   |      102 |
+% | tcp.toserver.443-443     | 24409321 |
+% | tcp.toserver.445-445     |      185 |
+% | tcp.toserver.4786-4786   |      659 |
+% | tcp.toserver.49152-49152 |      386 |
+% | tcp.toserver.50000-50000 |      230 |
+% | tcp.toserver.53-53       |    24108 |
+% | tcp.toserver.5432-5432   |     1233 |
+% | tcp.toserver.55443-55443 |    27701 |
+% | tcp.toserver.55611-55611 |       23 |
+% | tcp.toserver.5800-5800   |      747 |
+% | tcp.toserver.5801-5820   |    11580 |
+% | tcp.toserver.587-587     |     2563 |
+% | tcp.toserver.5900-5920   |     5465 |
+% | tcp.toserver.7080-7080   |     2611 |
+% | tcp.toserver.80-80       |  2208198 |
+% | tcp.toserver.8080-8080   |     7866 |
+% | tcp.toserver.993-993     |   229128 |
+% | tcp.toserver.995-995     |     1950 |
+% | udp.toclient.0-65535     | 12628630 |
+% | udp.toclient.1024-1433   |   744121 |
+% | udp.toclient.11211-11211 |        3 |
+% | udp.toclient.1434-1434   |        3 |
+% | udp.toclient.3478-3478   |    21187 |
+% | udp.toclient.41171-65535 |   894001 |
+% | udp.toclient.5060-5060   |       13 |
+% | udp.toclient.5093-5093   |       18 |
+% | udp.toclient.53-53       |   372353 |
+% | udp.toclient.5355-5355   |        9 |
+% | udp.toclient.9993-9993   |      284 |
+% | udp.toserver.0-65535     | 36607604 |
+% | udp.toserver.10000-11210 |    34972 |
+% | udp.toserver.1024-1024   |     9579 |
+% | udp.toserver.111-111     |       28 |
+% | udp.toserver.11211-11211 |        5 |
+% | udp.toserver.1194-1194   |  8486397 |
+% | udp.toserver.123-123     |     6960 |
+% | udp.toserver.12345-12345 |      282 |
+% | udp.toserver.135-135     |        2 |
+% | udp.toserver.1434-1434   |        3 |
+% | udp.toserver.161-161     |      519 |
+% | udp.toserver.17500-17500 |       13 |
+% | udp.toserver.1985-1985   |        1 |
+% | udp.toserver.21116-21116 |      314 |
+% | udp.toserver.3544-3544   |      481 |
+% | udp.toserver.39889-39889 |        3 |
+% | udp.toserver.40500-40500 |        1 |
+% | udp.toserver.4070-4070   |       52 |
+% | udp.toserver.4569-4569   |        1 |
+% | udp.toserver.4660-4799   |     3491 |
+% | udp.toserver.500-500     |     1616 |
+% | udp.toserver.50000-50000 |    71034 |
+% | udp.toserver.50001-50001 |    44860 |
+% | udp.toserver.5060-5060   |      471 |
+% | udp.toserver.5061-5061   |       42 |
+% | udp.toserver.5093-5093   |      324 |
+% | udp.toserver.53-53       |   377826 |
+% | udp.toserver.5632-5632   |       48 |
+% | udp.toserver.57621-57621 |        4 |
+% | udp.toserver.60000-65535 |  3953028 |
+% | udp.toserver.69-69       |      358 |
+% | udp.toserver.8000-8000   |     1958 |
+% | udp.toserver.8247-8247   |        3 |
+% | udp.toserver.9993-9993   |     4597 |
+
+% Part 3 – MPM Prefilter Usage
+
+% | MPM                |      Uses | Pkts (in %)   |        Bytes | Bytes (in %)   |
+% |--------------------|-----------|---------------|--------------|----------------|
+% | dns_query          |    378569 | 0.1%          |     10172813 | 0.0%           |
+% | file_data          |    147832 | 0.0%          |    219703505 | 0.1%           |
+% | http.location      |     64052 | 0.0%          |       853193 | 0.0%           |
+% | http.server        |     64052 | 0.0%          |       459604 | 0.0%           |
+% | http_accept        |     63896 | 0.0%          |       249289 | 0.0%           |
+% | http_accept_enc    |     63896 | 0.0%          |       293263 | 0.0%           |
+% | http_accept_lang   |     63896 | 0.0%          |       410910 | 0.0%           |
+% | http_client_body   |     64690 | 0.0%          |      5531438 | 0.0%           |
+% | http_connection    |     63896 | 0.0%          |       542712 | 0.0%           |
+% | http_content_len   |    127948 | 0.0%          |       113800 | 0.0%           |
+% | http_content_type  |    127948 | 0.0%          |       858531 | 0.0%           |
+% | http_cookie        |    127948 | 0.0%          |       263918 | 0.0%           |
+% | http_header        |    255251 | 0.1%          |     26270687 | 0.0%           |
+% | http_header_names  |    127948 | 0.0%          |      9617545 | 0.0%           |
+% | http_host          |     63896 | 0.0%          |      1335198 | 0.0%           |
+% | http_method        |     63681 | 0.0%          |       202872 | 0.0%           |
+% | http_raw_header    |    256045 | 0.1%          |     27124651 | 0.0%           |
+% | http_raw_host      |       335 | 0.0%          |         8274 | 0.0%           |
+% | http_raw_uri       |     63681 | 0.0%          |      6043381 | 0.0%           |
+% | http_referer       |     63896 | 0.0%          |        62383 | 0.0%           |
+% | http_request_line  |     63681 | 0.0%          |      6865430 | 0.0%           |
+% | http_response_line |     64383 | 0.0%          |       964658 | 0.0%           |
+% | http_start         |    127866 | 0.0%          |     34655777 | 0.0%           |
+% | http_stat_code     |     64383 | 0.0%          |       142821 | 0.0%           |
+% | http_uri           |     63681 | 0.0%          |      5855673 | 0.0%           |
+% | http_user_agent    |     63896 | 0.0%          |      2609561 | 0.0%           |
+% | ja3.hash           |   1076798 | 0.2%          |     34305120 | 0.0%           |
+% | ja3s.hash          |    571303 | 0.1%          |     17872448 | 0.0%           |
+% | packet:non_pf      | 207312572 | 47.7%         |            0 | 0.0%           |
+% | payload            | 142110150 | 32.7%         | 146153641587 | 61.1%          |
+% | ssh.proto          |      1740 | 0.0%          |            0 | 0.0%           |
+% | stream             |  77331343 | 17.8%         |  91899758596 | 38.4%          |
+% | tls.cert_issuer    |    958034 | 0.2%          |     15526597 | 0.0%           |
+% | tls.cert_serial    |    485974 | 0.1%          |     11630024 | 0.0%           |
+% | tls.cert_subject   |    485974 | 0.1%          |     15787379 | 0.0%           |
+% | tls.certs          |    571303 | 0.1%          |    846007490 | 0.4%           |
+% | tls.sni            |   1076798 | 0.2%          |     24371242 | 0.0%           |
+
+
+
