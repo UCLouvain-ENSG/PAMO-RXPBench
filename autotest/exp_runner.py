@@ -44,11 +44,7 @@ def tx_run(aggregator, cfg):
         aggregator["error"] = "Timeout reached for starting rx"
         return
     print("Got event !")
-<<<<<<< HEAD
-    output = exp.remote_tmux_launch_script(tx, experiment, "launch_pktgen.sh", cfg, verbose=False, method="source")
-=======
-    output = exp.remote_tmux_launch_script(tx, experiment, "launch_pktgen.sh", cfg, verbose=False, method="bash")
->>>>>>> c13a4b0 (explib: fix tests, add bash running method, render aliases from .bashrc in the scripts)
+    output = exp.remote_tmux_launch_script(tx, experiment, "launch_pktgen.sh", cfg, verbose=False, method="bash") # method="source"
     log_cmd(False, output)
 
     aggregator.update(exp.host_parse_single_result(output))
